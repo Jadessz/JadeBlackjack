@@ -1,10 +1,11 @@
 import type { Card } from '../game/types'
+import { assetUrl } from './asset'
 
 export function getCardImagePath(card: Card): string {
-  return `/cards/${card.rank}_of_${card.suit}.png`
+  return assetUrl(`cards/${card.rank}_of_${card.suit}.png`)
 }
 
-export const CARD_BACK_IMAGE = '/cards/Backside.png'
+export const CARD_BACK_IMAGE = assetUrl('cards/Backside.png')
 
 export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('en-US', {

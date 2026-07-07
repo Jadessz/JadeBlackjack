@@ -1,3 +1,5 @@
+import { assetUrl } from './asset'
+
 export type SoundName =
   | 'chip'
   | 'deal'
@@ -63,7 +65,7 @@ function prefetchSampleData() {
       continue
     }
 
-    const bytes = fetch(encodeURI(url))
+    const bytes = fetch(encodeURI(assetUrl(url)))
       .then((res) => {
         if (!res.ok) {
           throw new Error(`Failed to load ${url}: ${res.status}`)
