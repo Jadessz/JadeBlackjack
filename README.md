@@ -38,3 +38,15 @@ On first visit, the settings panel opens automatically.
 3. Press **Deal**
 4. Use **Hit**, **Stand**, **Double**, or **Split** when available
 5. Press **Next Hand** after each round
+
+## License
+
+The source code is licensed under the [MIT License](LICENSE).
+
+Third-party assets are **not** covered by the MIT License and remain under their
+own respective licenses/terms:
+
+- Card and chip images in `public/cards` and `public/chips`
+- Sound effects in `public/sounds` (sourced from Freesound and BigSoundBank)
+
+If you reuse this project, make sure you have the rights to any bundled assets.
