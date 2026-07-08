@@ -255,15 +255,21 @@ function updateBestBankroll(stats: SessionStats, bankroll: number): SessionStats
   }
 }
 
+// The dealer only draws cards when there's a live player hand to play against.
+// A busted hand has already lost, and a player natural blackjack wins on the
+// spot — in both cases the dealer simply reveals the hole card and stops.
+function dealerHasLivePlayerHand(state: GameState): boolean {
+  return state.playerHands.some((hand) => !hand.busted && !isBlackjack(hand.cards))
+}
+
 function settleRound(state: GameState): GameState {
   const dealerHoleHidden = false
   let currentState = state
   let dealerHand = [...state.dealerHand]
 
-  const allBusted = state.playerHands.every((hand) => hand.busted)
   const dealerHasNatural = isBlackjack(dealerHand)
 
-  if (!allBusted && !dealerHasNatural) {
+  if (dealerHasLivePlayerHand(currentState) && !dealerHasNatural) {
     while (dealerShouldHit(dealerHand)) {
       const draw = drawFromShoe(currentState)
       currentState = draw.state
@@ -399,16 +405,40 @@ function dealerHitCard(state: GameState): GameState {
 
 function beginDealerTurn(state: GameState, message = 'Dealer reveals...'): GameState {
   const stoodHands = applyAutoStandToHands(state.playerHands)
-  const shouldRevealHole = state.dealerHoleHidden && state.dealerHand.length > 1
+  const holeStillHidden = state.dealerHoleHidden && state.dealerHand.length > 1
 
   return {
     ...state,
     phase: 'dealerTurn',
     playerHands: stoodHands,
-    dealerHiddenIndices: shouldRevealHole ? [DEALER_HOLE_CARD_INDEX] : [],
-    dealerAnimatingIndex: shouldRevealHole ? DEALER_HOLE_CARD_INDEX : -1,
-    dealerAnimPhase: shouldRevealHole ? 'flip' : 'none',
+    // The hole card stays face-down here. Its flip is kicked off a beat later by
+    // startDealerReveal so the player's final card is seen landing first, rather
+    // than the card appearing and the dealer revealing at the same instant.
+    dealerHiddenIndices: holeStillHidden ? [DEALER_HOLE_CARD_INDEX] : [],
+    dealerAnimatingIndex: -1,
+    dealerAnimPhase: 'none',
     message,
+  }
+}
+
+// Kicks off the hole-card flip animation. Called after a short delay once the
+// dealer turn has begun, so the reveal is visually separate from the player's
+// last action.
+export function startDealerReveal(state: GameState): GameState {
+  if (state.phase !== 'dealerTurn') {
+    return state
+  }
+
+  const shouldRevealHole = state.dealerHoleHidden && state.dealerHand.length > 1
+  if (!shouldRevealHole) {
+    return advanceDealerTurn(state)
+  }
+
+  return {
+    ...state,
+    dealerHiddenIndices: [DEALER_HOLE_CARD_INDEX],
+    dealerAnimatingIndex: DEALER_HOLE_CARD_INDEX,
+    dealerAnimPhase: 'flip',
   }
 }
 
@@ -442,8 +472,7 @@ export function advanceDealerTurn(state: GameState): GameState {
       dealerAnimatingIndex,
     )
 
-    const allBusted = nextState.playerHands.every((hand) => hand.busted)
-    if (allBusted || isBlackjack(nextState.dealerHand)) {
+    if (!dealerHasLivePlayerHand(nextState) || isBlackjack(nextState.dealerHand)) {
       return settleRound({
         ...nextState,
         dealerHoleHidden: false,
@@ -463,8 +492,7 @@ export function advanceDealerTurn(state: GameState): GameState {
   }
 
   if (dealerAnimPhase === 'none') {
-    const allBusted = state.playerHands.every((hand) => hand.busted)
-    if (allBusted || isBlackjack(state.dealerHand)) {
+    if (!dealerHasLivePlayerHand(state) || isBlackjack(state.dealerHand)) {
       return settleRound({
         ...state,
         dealerHoleHidden: false,

@@ -98,6 +98,9 @@ export const MAX_SPLITS = 3
 export const DEALER_HOLE_CARD_INDEX = 1
 export const DEALER_CARD_DEAL_MS = 400
 export const DEALER_REVEAL_MS = 650
+// Beat between the player's final card landing and the dealer flipping the hole
+// card, so the two actions read as sequential rather than simultaneous.
+export const DEALER_REVEAL_DELAY_MS = 600
 export const SHUFFLE_MS = 4200
 
 export type GameAction =

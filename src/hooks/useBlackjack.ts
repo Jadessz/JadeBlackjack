@@ -18,6 +18,7 @@ import {
   restartGame,
   split,
   stand,
+  startDealerReveal,
   startNewGameWithSettings,
   takeInsurance,
   createInitialState,
@@ -28,6 +29,7 @@ import type { GameSettings } from '../game/settings'
 import {
   DEALER_CARD_DEAL_MS,
   DEALER_HOLE_CARD_INDEX,
+  DEALER_REVEAL_DELAY_MS,
   DEALER_REVEAL_MS,
   SHUFFLE_MS,
   type GameState,
@@ -173,6 +175,19 @@ export function useBlackjack() {
       return
     }
 
+    // Dealer turn has just begun and the hole card is still face-down: pause so
+    // the player's final card lands before the dealer flips its hidden card.
+    if (
+      state.dealerHoleHidden &&
+      state.dealerAnimPhase === 'none' &&
+      state.dealerHand.length > 1
+    ) {
+      const timer = window.setTimeout(() => {
+        setState((current) => startDealerReveal(current))
+      }, DEALER_REVEAL_DELAY_MS)
+      return () => window.clearTimeout(timer)
+    }
+
     if (state.dealerAnimPhase === 'none' && state.dealerAnimatingIndex < 0) {
       const timer = window.setTimeout(() => {
         setState((current) => advanceDealerTurn(current))
@@ -186,7 +201,13 @@ export function useBlackjack() {
     }, delay)
 
     return () => window.clearTimeout(timer)
-  }, [state.phase, state.dealerAnimPhase, state.dealerAnimatingIndex, state.dealerHand.length])
+  }, [
+    state.phase,
+    state.dealerAnimPhase,
+    state.dealerAnimatingIndex,
+    state.dealerHoleHidden,
+    state.dealerHand.length,
+  ])
 
   useEffect(() => {
     if (state.phase !== 'shuffling') {
