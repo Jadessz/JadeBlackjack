@@ -511,8 +511,17 @@ button {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: flex-start;
   gap: 1rem;
   width: 100%;
+}
+
+.table__hands--2 .hand,
+.table__hands--3 .hand,
+.table__hands--4 .hand {
+  flex: 1 1 min(100%, 20rem);
+  min-width: 0;
+  max-width: 100%;
 }
 
 .table__controls {
@@ -546,6 +555,7 @@ button {
   border-radius: 1rem;
   padding: 0.9rem 1rem 1rem;
   min-width: min(100%, 22rem);
+  max-width: 100%;
   transition:
     box-shadow 0.25s ease,
     transform 0.25s ease,
@@ -632,9 +642,47 @@ button {
 
 .hand__cards {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: center;
-  gap: 0.55rem;
+  align-items: flex-start;
+  gap: 0;
+  max-width: 100%;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+/* Overlapping fan — keeps many cards in one row like a real table layout. */
+.hand__cards .card {
+  flex-shrink: 0;
+  position: relative;
+}
+
+.hand__cards .card:not(:first-child) {
+  margin-left: -2.35rem;
+}
+
+.hand__cards--many .card:not(:first-child) {
+  margin-left: -2.75rem;
+}
+
+.hand__cards--5 .card,
+.hand__cards--6 .card {
+  width: 4.85rem;
+}
+
+.hand__cards--5 .card:not(:first-child),
+.hand__cards--6 .card:not(:first-child) {
+  margin-left: -2.55rem;
+}
+
+.hand__cards--7 .card,
+.hand__cards--8 .card {
+  width: 4.25rem;
+}
+
+.hand__cards--7 .card:not(:first-child),
+.hand__cards--8 .card:not(:first-child) {
+  margin-left: -2.35rem;
 }
 
 .hand__bet {

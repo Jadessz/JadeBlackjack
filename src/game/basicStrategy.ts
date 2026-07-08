@@ -1,4 +1,4 @@
-import { getHandValue } from './hand'
+import { getHandValue, isSplittablePair, isTenValueRank } from './hand'
 import type { Card } from './types'
 
 export type StrategyAction = 'hit' | 'stand' | 'double' | 'split' | 'decline-insurance' | 'surrender'
@@ -72,12 +72,12 @@ function getDealerColumn(dealerUpcard: Card): number {
 }
 
 function getPairKey(cards: Card[]): string | null {
-  if (cards.length !== 2 || cards[0].rank !== cards[1].rank) {
+  if (cards.length !== 2 || !isSplittablePair(cards)) {
     return null
   }
 
   const rank = cards[0].rank
-  if (rank === '10' || rank === 'J' || rank === 'Q' || rank === 'K') {
+  if (isTenValueRank(rank) && isTenValueRank(cards[1].rank)) {
     return 'T,T'
   }
 

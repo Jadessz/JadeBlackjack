@@ -54,7 +54,7 @@ export function Hand({
           )}
         </div>
       </div>
-      <div className="hand__cards">
+      <div className={`hand__cards${cards.length > 3 ? ` hand__cards--many hand__cards--${Math.min(cards.length, 8)}` : ''}`}>
         {cards.map((card, index) => (
           <Card
             key={`${card.rank}-${card.suit}-${index}`}

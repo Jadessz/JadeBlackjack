@@ -49,6 +49,26 @@ export function isBust(cards: Card[]): boolean {
   return getHandValue(cards).total > 21
 }
 
+const TEN_VALUE_RANKS = new Set<Card['rank']>(['10', 'J', 'Q', 'K'])
+
+export function isTenValueRank(rank: Card['rank']): boolean {
+  return TEN_VALUE_RANKS.has(rank)
+}
+
+export function isSplittablePair(cards: Card[]): boolean {
+  if (cards.length !== 2) {
+    return false
+  }
+
+  const [first, second] = cards
+  if (first.rank === second.rank) {
+    return true
+  }
+
+  // Any two 10-value cards (10, J, Q, K) count as a splittable pair.
+  return isTenValueRank(first.rank) && isTenValueRank(second.rank)
+}
+
 export function canSplitHand(hand: PlayerHand, handCount: number, maxSplits: number): boolean {
   if (handCount > maxSplits) {
     return false
@@ -58,7 +78,7 @@ export function canSplitHand(hand: PlayerHand, handCount: number, maxSplits: num
     return false
   }
 
-  return hand.cards[0].rank === hand.cards[1].rank
+  return isSplittablePair(hand.cards)
 }
 
 export function isPairOfAces(hand: PlayerHand): boolean {
